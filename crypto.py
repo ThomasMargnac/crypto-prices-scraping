@@ -23,7 +23,7 @@ class Price():
 		# Defining currency
 		self.currency = currency
 		# Defining Dataframe to save history
-		self.dataframe = pd.DataFrame(columns = ['Time', 'Price'])
+		self.dataframe = pd.DataFrame(columns = ['Time', 'Price', 'Lower', 'Higher'])
 
 	def get(
 		self
@@ -45,13 +45,26 @@ class Price():
 		# Preparing my soup
 		soup = BeautifulSoup(response.content, features="html.parser")
 		# Getting price
-		price = soup.find('div', attrs={'class': 'priceValue'})
+		priceSection = soup.find('div', attrs={'class': 'priceSection'})
+		price = priceSection.find('div', attrs={'class': 'priceValue'})
 		price = cleaning_price(price.text)
+		# Getting lower and higher price in the last 24h
+		volatilitySection = soup.find('div', attrs={'class': 'sliderSection'})
+		# Removing unwanted div
+		slider = volatilitySection.find('div', attrs={'class': 'slider'})
+		slider.extract()
+		namePillBase = volatilitySection.find('div', attrs={'class': 'namePillBase'})
+		namePillBase.extract()
+		volatilityPrices = volatilitySection.findChildren('div')
+		lower = cleaning_price(volatilityPrices[0].text)
+		higher = cleaning_price(volatilityPrices[1].text)
 		# Saving to history dataframe
 		data = pd.DataFrame(
 			{
 				'Time': [time],
-				'Price': [price]
+				'Price': [price],
+				'Lower': [lower],
+				'Higher': [higher]
 			}
 		)
 		self.dataframe = pd.concat(
@@ -59,4 +72,4 @@ class Price():
 			ignore_index=True
 		)
 		# Returning data
-		return price
+		return price, lower, higher
