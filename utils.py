@@ -1,14 +1,10 @@
+import re
+
 def cleaning_price(
 	price: str
 ):
-	# Removing "$" sign
-	price = price.replace("$", "")
-	# Removing "," sign
-	price = price.replace(",", "")
-	# Removing "Low:"
-	price = price.replace("Low:", "")
-	# Removing "High:"
-	price = price.replace("High:", "")
+	# Removing all characters except for digits and point
+	price = re.sub(r'[^0-9.]', '', price)
 	# From str to float
 	price = float(price)
 	# Returning price

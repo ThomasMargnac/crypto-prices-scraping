@@ -23,7 +23,7 @@ class Price():
 		# Defining currency
 		self.currency = currency
 		# Defining Dataframe to save history
-		self.dataframe = pd.DataFrame(columns = ['Time', 'Price', 'Lower', 'Higher'])
+		self.dataframe = pd.DataFrame(columns = ['Time', 'Price', 'Lower', 'Higher', 'Circulating'])
 
 	def get(
 		self
@@ -58,13 +58,17 @@ class Price():
 		volatilityPrices = volatilitySection.findChildren('div')
 		lower = cleaning_price(volatilityPrices[0].text)
 		higher = cleaning_price(volatilityPrices[1].text)
+		# Getting stats
+		stats = soup.find('div', attrs={'class': 'statsSection'})
+		circulatingSupply = cleaning_price(stats.find('div', attrs={'class': 'supplyBlockPercentage'}).previous_sibling.text)
 		# Saving to history dataframe
 		data = pd.DataFrame(
 			{
 				'Time': [time],
 				'Price': [price],
 				'Lower': [lower],
-				'Higher': [higher]
+				'Higher': [higher],
+				'Circulating': [circulatingSupply]
 			}
 		)
 		self.dataframe = pd.concat(
@@ -72,4 +76,4 @@ class Price():
 			ignore_index=True
 		)
 		# Returning data
-		return price, lower, higher
+		return time, price, lower, higher, circulatingSupply
